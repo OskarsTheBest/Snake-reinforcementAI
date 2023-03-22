@@ -8,8 +8,8 @@ from helper import plot
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
 LR = 0.001
-
-
+fruit = Fruit()
+snake = Snake()
 
 class Agent:
     
@@ -24,17 +24,20 @@ class Agent:
     
 
     def get_state(self,game):
-        head = Snake.body[0]
+        head = snake.body[0]
+        
+        fruit_x = fruit.x
+        fruit_y = fruit.y
         
         point_l = Point(head.x - 20, head.y)
         point_r = Point(head.x + 20, head.y)
         point_u = Point(head.x, head.y - 20)
         point_d = Point(head.x, head.y + 20)
         
-        dir_l = game.direction == Vector2(-1, 0)
-        dir_r = game.direction == Vector2(1,0)
-        dir_u = game.direction == Vector2(0, -1)
-        dir_d = game.direction == Vector2(0,1)
+        dir_l = snake.direction == Vector2(-1, 0)
+        dir_r = snake.direction == Vector2(1,0)
+        dir_u = snake.direction == Vector2(0, -1)
+        dir_d = snake.direction == Vector2(0,1)
         
         state =[
             
@@ -60,10 +63,10 @@ class Agent:
             dir_u,
             dir_d,
             
-            Fruit.pos.x < game.head.x,
-            Fruit.pos.x > game.head.x,
-            Fruit.pos.y < game.head.y,
-            Fruit.pos.y > game.head.y
+            fruit_x < head.x,
+            fruit_x > head.x,
+            fruit_y < head.y,
+            fruit_y > head.y
             
         ]
         
@@ -138,7 +141,6 @@ def train():
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
-
-    #trying to find what i can call here so the game.py starts and does the train() func, because this does not work
-   # if__name__ == '__main__':
-    #   train()
+    
+if __name__ == '__main__':
+    train()

@@ -98,7 +98,7 @@ class Snake:
     def reset(self):
         self.body = [Vector2(5,10), Vector2(4,10), Vector2(3,10)]
         self.direction = Vector2(0,0)
-        self.frame_iteration = 0
+
 
         
 class Fruit:
@@ -120,7 +120,11 @@ class Main:
     def __init__(self):
         self.snake = Snake()
         self.fruit = Fruit()
-
+        self.display = pygame.display.update
+        self.clock = clock.tick(200)
+        pygame.time.set_timer(SCREEN_UPDATE, 150)
+        self.draw_elements()
+        screen.fill((166,216,81))
         
     def update(self):
         self.snake.move_snake()
@@ -160,6 +164,7 @@ class Main:
             
     def game_over(self):
         reward = -10
+        self.frame_iteration = 0
         self.snake.reset()
         return reward
         
@@ -238,15 +243,10 @@ game_font = pygame.font.Font("font/04B_30__.ttf", 25)
 
 
 SCREEN_UPDATE = pygame.USEREVENT
-pygame.time.set_timer(SCREEN_UPDATE, 150)
+
 
 main_game = Main()
 
-while True: 
-    screen.fill((166,216,81))
-    main_game.draw_elements()
-    pygame.display.update()
-    clock.tick(200)
-    
+
     
     
