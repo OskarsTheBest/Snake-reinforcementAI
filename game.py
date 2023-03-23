@@ -2,9 +2,17 @@ import pygame, sys, random
 from pygame.math import Vector2
 import numpy as np
 from collections import namedtuple
-
+from enum import Enum
 
 Point = namedtuple('Point', 'x, y')
+
+
+class Direction(Enum):
+    RIGHT = 1 
+    LEFT = 2
+    UP = 3
+    DOWN = 4
+
 
 class Snake:
     def __init__(self):
@@ -125,6 +133,8 @@ class Main:
         pygame.time.set_timer(SCREEN_UPDATE, 150)
         self.draw_elements()
         screen.fill((166,216,81))
+        self.frame_iteration = 0
+        
         
     def update(self):
         self.snake.move_snake()
@@ -198,14 +208,37 @@ class Main:
         pygame.draw.rect(screen, (13,11,58), bg_rect,2)
         
     def play_step(self, action):
-        directionR = main_game.snake.direction = Vector2(1, 0)
-        directionD = main_game.snake.direction = Vector2(0, 1)
-        directionL = main_game.snake.direction = Vector2(-1,0)
-        directionU = main_game.snake.direction = Vector2(0, -1)
-        
         self.frame_iteration += 1
-        clock_wise = [directionR, directionD, directionL, directionU]
-        idx = clock_wise.index(self)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+                
+        self._move(action)
+        
+        reward = 0
+        game_over = False
+        if self.check_fail() or self.frame_iteration > 100*len(self.snake):
+            game_over = True
+            reward = -10
+            return reward, game_over
+        
+        self.check_collision()
+        
+        self.clock.tick(200)
+        
+        return reward, game_over
+        
+
+
+    def _move(self, action):
+        
+       
+        clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
+        
+        idx = clock_wise.index(self.direction)
+        
         
         if np.array_equal(action, [1,0,0]):
             new_dir = clock_wise[idx]
@@ -216,19 +249,16 @@ class Main:
             next_idx = (idx - 1) % 4
             new_dir = clock_wise[next_idx]
             
-        self
+        main_game.snake.direction = new_dir
         
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == SCREEN_UPDATE:
-                main_game.update()
-                
-
-        
-        reward = 0
-
+        if self.direction == Direction.RIGHT:
+            main_game.snake.direction = Vector2(1,0)
+        if self.direction == Direction.DOWN:
+            main_game.snake.direction = Vector2(0,1)
+        if self.direction == Direction.LEFT:
+            main_game.snake.direction = Vector2(-1, 0)
+        if self.direction == Direction.UP:
+            main_game.snake.direction = Vector2(0, -1)
             
 pygame.mixer.pre_init(44100,-16,2,512)            
 pygame.init()
