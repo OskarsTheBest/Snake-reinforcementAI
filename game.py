@@ -4,8 +4,15 @@ import numpy as np
 from collections import namedtuple
 from enum import Enum
 
+pygame.mixer.pre_init(44100,-16,2,512)  
+pygame.init()
+
+font = pygame.font.Font("font/04B_30__.ttf", 25)
+
 Point = namedtuple('Point', 'x, y')
 
+SPEED = 40
+WHITE = (255, 255, 255)
 
 class Direction(Enum):
     RIGHT = 1 
@@ -126,14 +133,15 @@ class Fruit:
 
 class Main:
     def __init__(self):
+        self.direction = Direction.RIGHT
         self.snake = Snake()
         self.fruit = Fruit()
         self.display = pygame.display.update
-        self.clock = clock.tick(200)
+        self.clock = pygame.time.Clock()
         pygame.time.set_timer(SCREEN_UPDATE, 150)
         self.draw_elements()
-        screen.fill((166,216,81))
         self.frame_iteration = 0
+        self.score = 0
         
         
     def update(self):
@@ -153,27 +161,29 @@ class Main:
             self.snake.add_block()
             self.snake.play_crunch_sound()
             reward = +10
+            self.score =+ 1
             
         for block in self.snake.body[1:]:
             if block == self.fruit.pos:
                 self.fruit.randomize()
-        return reward
+
             
-    def check_fail(self):
+    def check_fail(self, pt=None):
         if pt is None:
             pt = self.snake.body[0]
-        if not 0 <= pt.x < cell_number or self.frame_iteration > 100*len(self.snake):
+        if not 0 <= pt.x < cell_number or self.frame_iteration > 100*len(self.snake.body):
             self.game_over()
             
-        if not 0 <= pt.y < cell_number or self.frame_iteration > 100*len(self.snake):
+        if not 0 <= pt.y < cell_number or self.frame_iteration > 100*len(self.snake.body):
             self.game_over()
             
         for block in self.snake.body[1:]:
-            if block == pt or self.frame_iteration > 100*len(self.snake):
+            if block == pt or self.frame_iteration > 100*len(self.snake.body):
                 self.game_over()
             
     def game_over(self):
         reward = -10
+        self.score = 0
         self.frame_iteration = 0
         self.snake.reset()
         return reward
@@ -219,16 +229,16 @@ class Main:
         
         reward = 0
         game_over = False
-        if self.check_fail() or self.frame_iteration > 100*len(self.snake):
+        if self.check_fail() or self.frame_iteration > 100*len(self.snake.body):
             game_over = True
             reward = -10
-            return reward, game_over
+            return reward, game_over, self.score
         
         self.check_collision()
         
-        self.clock.tick(200)
+        self.clock.tick(SPEED)
         
-        return reward, game_over
+        return reward, game_over, self.score
         
 
 
@@ -260,12 +270,16 @@ class Main:
         if self.direction == Direction.UP:
             main_game.snake.direction = Vector2(0, -1)
             
-pygame.mixer.pre_init(44100,-16,2,512)            
-pygame.init()
+            
+    def _update_ui(self):
+        screen.fill((166,216,81))
+        self.draw_elements()
+        text = font.render("Score :" + str(self.score), True, WHITE)
+        self.display.blit(text, [0,0])
+            
 cell_size = 40
 cell_number = 20
 screen = pygame.display.set_mode((cell_number * cell_size, cell_number * cell_size))
-clock = pygame.time.Clock()
 score_image = pygame.image.load("static/RealRaspberry.png").convert_alpha()
 raspberry = pygame.image.load("static/Raspberry-.png").convert_alpha()
 game_font = pygame.font.Font("font/04B_30__.ttf", 25)
