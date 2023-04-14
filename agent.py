@@ -2,7 +2,7 @@ import torch
 import random
 import numpy as np
 from collections import deque
-from game import Main, Snake, Point, Vector2, Fruit
+from game import Main, Snake, Vector2, Fruit
 from model import Linear_QNet, QTrainer
 from helper import plot
 MAX_MEMORY = 100_000
@@ -23,16 +23,16 @@ class Agent:
         
     
 
-    def get_state(self,game):
+    def get_state(self,game, fruit, snake):
         head = snake.body[0]
         
         fruit_x = fruit.x
         fruit_y = fruit.y
         
-        point_l = Point(head.x - 20, head.y)
-        point_r = Point(head.x + 20, head.y)
-        point_u = Point(head.x, head.y - 20)
-        point_d = Point(head.x, head.y + 20)
+        point_l = Vector2(head.x - 20, head.y)
+        point_r = Vector2(head.x + 20, head.y)
+        point_u = Vector2(head.x, head.y - 20)
+        point_d = Vector2(head.x, head.y + 20)
         
         dir_l = snake.direction == Vector2(-1, 0)
         dir_r = snake.direction == Vector2(1,0)
@@ -113,13 +113,16 @@ def train():
     record = 0
     agent = Agent()
     game = Main()
+    fruit = Fruit()
+    snake = Snake()
+    
     while True:
-        state_old = agent.get_state(game)
+        state_old = agent.get_state(game, fruit, snake)
         
         final_move = agent.get_action(state_old)
         
         reward, done, score = game.play_step(final_move)
-        state_new = agent.get_state(game)
+        state_new = agent.get_state(game, fruit, snake)
         
         agent.train_short_memory(state_old, final_move, reward, state_new, done)
         

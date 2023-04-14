@@ -1,7 +1,7 @@
 import pygame, sys, random
 from pygame.math import Vector2
 import numpy as np
-from collections import namedtuple
+
 from enum import Enum
 
 pygame.mixer.pre_init(44100,-16,2,512)  
@@ -9,7 +9,6 @@ pygame.init()
 
 font = pygame.font.Font("font/04B_30__.ttf", 25)
 
-Point = namedtuple('Point', 'x, y')
 
 SPEED = 40
 WHITE = (255, 255, 255)
@@ -146,7 +145,7 @@ class Main:
         
     def update(self):
         self.snake.move_snake()
-        self.check_collision()
+        self._check_collision()
         self.check_fail()
         
     def draw_elements(self):
@@ -155,7 +154,7 @@ class Main:
         self.snake.draw_snake()
         self.draw_score()
 
-    def check_collision(self):
+    def _check_collision(self):
         if self.fruit.pos == self.snake.body[0]:
             self.fruit.randomize()
             self.snake.add_block()
@@ -227,6 +226,7 @@ class Main:
                 
         self._move(action)
         
+        
         reward = 0
         game_over = False
         if self.check_fail() or self.frame_iteration > 100*len(self.snake.body):
@@ -234,7 +234,7 @@ class Main:
             reward = -10
             return reward, game_over, self.score
         
-        self.check_collision()
+        self._check_collision()
         
         self.clock.tick(SPEED)
         
